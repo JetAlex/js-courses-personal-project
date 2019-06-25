@@ -24,12 +24,21 @@ class Transaction {
   }
 
   validateScenario(scenario) {
+    try {
+      if (!Array.isArray(scenario)) {
+        throw new Error('provided scenario type is not an array')
+      }
+    } catch (error) {
+      this.saveErrorLog(null, error);
+      throw new Error(error);
+    }
+
     scenario.forEach((task) => {
       try {
         Transaction.validateTask(task);
       } catch (error) {
         this.saveErrorLog(task, error);
-        throw new Error;
+        throw new Error(error);
       }
     });
   }
@@ -91,7 +100,7 @@ class Transaction {
 
       this.clearStore();
 
-      throw new Error;
+      throw new Error(error);
     }
   };
 
@@ -107,7 +116,7 @@ class Transaction {
             success: 'false',
           },
         });
-        throw new Error;
+        throw new Error(error);
       }
     }
   }
@@ -124,7 +133,7 @@ class Transaction {
             success: 'false',
           },
         });
-        throw new Error;
+        throw new Error(error);
       }
     }
   }
@@ -141,10 +150,15 @@ class Transaction {
   }
 
   saveErrorLog(task, error, operation) {
-    this.logs.push({
-      ...operation,
+
+    const taskInfo = task ? {
       index: task.index,
       meta: task.meta,
+    } : void 0;
+
+    this.logs.push({
+      ...operation,
+      ...taskInfo,
       error: {
         name: error.name,
         message: error.message,
